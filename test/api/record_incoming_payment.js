@@ -149,7 +149,7 @@ describe('record_incoming_payments', function() {
       state: 'incoming',
       transaction_hash: '45154213',
       memos: [{ MemoData: '7274312E302E3132', MemoType: '636C69656E74' }]
-    }), {tag: ['Validation isInt failed: tag']});
+    }), /Failed to create ripple_transaction record/);
   });
 
   it('should fail when destination_amount.value is missing is not a valid int', function() {
@@ -160,7 +160,6 @@ describe('record_incoming_payments', function() {
         currency: 'USD',
         issuer: 'r123'
       },
-      source_account: address,
       source_amount: {
         value: 6,
         currency: 'EUR',
@@ -170,7 +169,7 @@ describe('record_incoming_payments', function() {
       state: 'incoming',
       transaction_hash: '45154213',
       memos: [{ MemoData: '7274312E302E3132', MemoType: '636C69656E74' }]
-    }), {"to_amount":["Validation notNull failed: to_amount","Validation isDecimal failed: to_amount"]});
+    }), /Failed to create ripple_transaction record/);
   });
 
   after(function() {

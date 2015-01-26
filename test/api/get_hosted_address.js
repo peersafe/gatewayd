@@ -35,7 +35,7 @@ describe('get_hosted_address ', function() {
   });
 
   it('should fail to persist a ripple_address record because \'tag\' field is not an int', function() {
-    return chai.assert.isRejected(gatewayd.api.getHostedAddress('ab123'), {tag: ['Validation isInt failed: tag']});
+    return chai.assert.isRejected(gatewayd.api.getHostedAddress('ab123'), /Failed find or create hosted address/);
   });
 
   after(function() {
