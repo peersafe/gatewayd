@@ -1,5 +1,5 @@
-![Travis CI Build Status](https://api.travis-ci.org/ripple/gatewayd.svg?branch=develop) 
-[![Coverage Status](https://coveralls.io/repos/ripple/gatewayd/badge.png?branch=develop)](https://coveralls.io/r/ripple/gatewayd?branch=develop)
+![Travis CI Build Status](https://api.travis-ci.org/ripple/gatewayd.svg?branch=master) 
+[![Coverage Status](https://coveralls.io/repos/ripple/gatewayd/badge.png?branch=master)](https://coveralls.io/r/ripple/gatewayd?branch=develop)
 
 # Gatewayd #
 
@@ -15,6 +15,11 @@ Gatewayd's features include:
   - incoming Ripple payment monitoring
   - gateway administration
   - support for custom plugins
+
+## Installation
+
+- Comprehensive [installation script](https://github.com/ripple/gatewayd/blob/master/doc/install.md) for Ubuntu
+- Comprehensive [installation script](https://github.com/ripple/gatewayd/blob/master/doc/installmac.md) for Mac
 
 ## Documentation
 
@@ -41,11 +46,6 @@ The [Ripple Dev Portal](https://ripple.com/build/gatewayd/) contains detailed in
   - The Ripple REST API provides a simplified HTTP/JSON interface to all the Ripple protocol network operations, such as payments and other transactions.
 
 4. [git](http://git-scm.com/) is required for installation and updating. It is not used during general operation.
-
-## Installation
-
-- Comprehensive [installation script](https://github.com/ripple/gatewayd/blob/master/doc/install.md) for Ubuntu
-- Comprehensive [installation script](https://github.com/ripple/gatewayd/blob/master/doc/installmac.md) for Mac
 
 ## Updating ##
 
@@ -81,4 +81,18 @@ In addition to the REST interface, many pieces of Gatewayd can be controlled dir
 You can get usage information for the commandline as follows:
 
     bin/gateway -h
+
+## Code Release Process ##
+
+The following is an example flow for releasing changes to master:
+
+- create a new release branch such as `release-3.35.1` with the patch
+- bump the version patch number in the package.json: change 3.35.0 to 3.35.1
+- cherry pick the patch commit into the release branch `git cherry-pick <commit>`
+- summarize the release in doc/releases.md
+- create a git tag with the version number:  `git tag -a v3.35.1`
+- merge the release branch into the `master` branch
+- push master to the origin remote: `git push origin master`
+- push release tag to origin remote: `git push --tags`
+- rebase the develop branch: `git checkout develop && git rebase master`
 
