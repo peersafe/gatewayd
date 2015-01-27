@@ -11,6 +11,7 @@ describe('api.createExternalPayment', function() {
       var options = {
         state                : 'invoice',
         direction            : 'outgoing',
+        address              : 'gateway',
         destination_address  : 'acct:me@stevenzeiler.com',
         source_address       : 'acct:gateway',
         destination_amount   : 10,
@@ -56,6 +57,7 @@ describe('api.createExternalPayment', function() {
       var options = {
         state                : 'invoice',
         direction            : 'incoming',
+        address              : 'gateway',
         source_address       : 'acct:me@stevenzeiler.com',
         destination_address  : 'acct:gateway',
         destination_amount   : 10,
