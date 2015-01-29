@@ -60,7 +60,7 @@
     "ripple-lib": "",
     "ripple-rest-client": "^1.11.0",
     "ripple-wallet": "1.0.0",
-    "sequelize": "^1.7.0",
+    "sequelize": "^1.7.10",
     "sinon": "^1.12.1",
     "sql-mq-worker": "^1.0.3",
     "sqlite3": "^3.0.2",
