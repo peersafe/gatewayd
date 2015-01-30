@@ -84,11 +84,13 @@ describe('ripple_associations', function() {
           .then(function(transaction) {
             rippleTransaction = transaction;
             done();
-          })
+          }).error(function(error) {
+              done(error);
+            })
         })
       })
     })
-	})
+	});
 
   after(function(done) {
     toAddress.destroy()
