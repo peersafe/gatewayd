@@ -38,6 +38,7 @@ module.exports.incoming_payments = {
     var payment               = {};
     var incomingPayments      = {};
     payment.payment           = this.valid;
+    payment.hash              = 'B664743F640F0F2E79BC9C9887C6A569844EB91B5D9B4F17E5E9570AB78F8F53';
     incomingPayments.payments = [];
     incomingPayments.payments.push(payment);
     return incomingPayments;
