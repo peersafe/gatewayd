@@ -1,3 +1,21 @@
+#### 02/13/2015
+
+### 3.35.0
+
+#### Added Features
+- Added support for new bridge quote and bridge payment functionality
+- Added pagination to external_transactions resource endpoint
+
+#### Fixed Bugs
+
+- `pm2 start` command not showing lists of process
+- Exception when passing query parameters in the resource endpoints
+- Made incoming process backwards compatible to the new ripple rest response structure
+- Removed unneeded associations and foreign key constraints
+- Model associations were adding random columns that don't exist to queries
+- Change config to correct `createdAt` column no being able to be changed to a future date
+- Withdrawals to lookup using the correct field
+
 ### 01/06/2014
 
 ### 3.34.1
