@@ -49,8 +49,6 @@
     "mocha": "~1.14.0",
     "nconf": "~0.6",
     "node-uuid": "1.4.1",
-    "passport": "",
-    "passport-http": "",
     "pg": "^3.0.3",
     "pm2": "^0.12.3",
     "request": "",

@@ -13,9 +13,6 @@ nconf.defaults({
   'SSL_KEY_PATH': __dirname+'/../env/certs/server.key',
   'SSL_CERTIFICATE_PATH': __dirname+'/../env/certs/server.crt',
   'HTTP_SERVER': true, // Serve http/json api
-  'BASIC_AUTH': true, // Require admin key for http api
-  'KEY': false, // Required for BASIC_AUTH
-  'USER_AUTH': false, // Enable user routes with name/password basic auth
   'WEBAPP': true,
   'WEBAPP_PATH': __dirname + '/../node_modules/gatewayd-admin/',
   'PORT': 5000, // Port of http api server
