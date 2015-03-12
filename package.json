@@ -58,7 +58,7 @@
     "require-all-to-camel": "^1.0.0",
     "ripple-account-monitor": "^2.2.0",
     "ripple-lib": "",
-    "ripple-rest-client": "^1.11.0",
+    "ripple-rest-client": "^1.13.2",
     "ripple-wallet": "1.0.0",
     "sequelize": "^1.7.10",
     "sinon": "^1.12.1",
