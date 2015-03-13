@@ -3,7 +3,8 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const gatewayd = require(__dirname+'/../../');
 const OutgoingPayment = require(__dirname+'/../../lib/core/outgoing_payment.js');
-var fixtures = require(__dirname+'/../fixtures/ripple_rest_integration.js');
+var fixturesRippleRestIntegration = require(__dirname+'/../fixtures/ripple_rest_integration.js');
+var fixturesOutgoingPayment = require(__dirname+'/../fixtures/outgoing_payments.js');
 var RippleTransactions = gatewayd.models.rippleTransactions;
 
 describe('Outgoing Payment', function() {
@@ -19,10 +20,10 @@ describe('Outgoing Payment', function() {
 
     it('should handle insufficient fund error and mark record failed', function(done) {
       RippleTransactions
-        .create(fixtures.outgoing_record)
+        .create(fixturesOutgoingPayment.requests.outgoing_record)
         .then(function (rippleTransaction) {
           var outgoingPayment = new OutgoingPayment(rippleTransaction);
-          return outgoingPayment._rippleRestResponseHandler(fixtures.errors.insufficient_funds)
+          return outgoingPayment._rippleRestResponseHandler(fixturesRippleRestIntegration.errors.insufficient_funds)
             .then(function(handledError){
               chai.assert.strictEqual(handledError.record.state, 'failed');
               chai.assert.strictEqual(handledError.record.transaction_state, 'terINSUF_FEE_B');
@@ -34,10 +35,10 @@ describe('Outgoing Payment', function() {
 
     it('should handle transaction not found -- retry', function(done) {
       RippleTransactions
-        .create(fixtures.outgoing_record)
+        .create(fixturesOutgoingPayment.requests.outgoing_record)
         .then(function (rippleTransaction) {
           var outgoingPayment = new OutgoingPayment(rippleTransaction);
-          return outgoingPayment._rippleRestResponseHandler(fixtures.errors.invalid_requests.transaction_not_found)
+          return outgoingPayment._rippleRestResponseHandler(fixturesRippleRestIntegration.errors.invalid_requests.transaction_not_found)
             .then(function(handledError){
 
               chai.assert.strictEqual(handledError.record.state, 'outgoing');
@@ -53,12 +54,12 @@ describe('Outgoing Payment', function() {
     it('should handle no path found -- failed', function(done) {
 
       RippleTransactions
-        .create(fixtures.outgoing_record)
+        .create(fixturesOutgoingPayment.requests.outgoing_record)
         .then(function (rippleTransaction) {
 
           var outgoingPayment = new OutgoingPayment(rippleTransaction);
 
-          outgoingPayment._rippleRestResponseHandler(fixtures.errors.invalid_requests.no_paths_found)
+          outgoingPayment._rippleRestResponseHandler(fixturesRippleRestIntegration.errors.invalid_requests.no_paths_found)
             .then(function(handledError){
               chai.assert.strictEqual(handledError.record.transaction_state, 'tecPATH_DRY');
               chai.assert.strictEqual(handledError.record.state, 'failed');
@@ -72,10 +73,10 @@ describe('Outgoing Payment', function() {
   it('should handle no rippled connection error -- retry', function(done) {
 
     RippleTransactions
-      .create(fixtures.outgoing_record)
+      .create(fixturesOutgoingPayment.requests.outgoing_record)
       .then(function (rippleTransaction) {
         var outgoingPayment = new OutgoingPayment(rippleTransaction);
-        return outgoingPayment._rippleRestResponseHandler(fixtures.errors.connection.no_rippled_connection)
+        return outgoingPayment._rippleRestResponseHandler(fixturesRippleRestIntegration.errors.connection.no_rippled_connection)
           .then(function(handledError){
             chai.assert.strictEqual(handledError.handled, 'retry');
             done();
@@ -87,10 +88,10 @@ describe('Outgoing Payment', function() {
   it('should handle rippled busy error -- retry', function(done) {
 
     RippleTransactions
-      .create(fixtures.outgoing_record)
+      .create(fixturesOutgoingPayment.requests.outgoing_record)
       .then(function (rippleTransaction) {
         var outgoingPayment = new OutgoingPayment(rippleTransaction);
-        return outgoingPayment._rippleRestResponseHandler(fixtures.errors.connection.rippled_busy)
+        return outgoingPayment._rippleRestResponseHandler(fixturesRippleRestIntegration.errors.connection.rippled_busy)
           .then(function(handledError){
             chai.assert.strictEqual(handledError.handled, 'retry');
             done();
@@ -104,7 +105,7 @@ describe('Outgoing Payment', function() {
     error.code = 'ECONNRESET';
 
     RippleTransactions
-      .create(fixtures.outgoing_record)
+      .create(fixturesOutgoingPayment.requests.outgoing_record)
       .then(function (rippleTransaction) {
         var outgoingPayment = new OutgoingPayment(rippleTransaction);
         return outgoingPayment._rippleRestResponseHandler(error)
@@ -129,10 +130,10 @@ describe('Sending a queued payment to ripple', function() {
   it('should record the rejection of a payment from the Ripple Ledger', function(done) {
 
     RippleTransactions
-      .create(fixtures.outgoing_record)
+      .create(fixturesOutgoingPayment.requests.outgoing_record)
       .then(function (rippleTransaction) {
         var outgoingPayment = new OutgoingPayment(rippleTransaction);
-        var confirmationResponse = new Object(fixtures.successful_responses.validated_payment);
+        var confirmationResponse = new Object(fixturesRippleRestIntegration.successful_responses.validated_payment);
         confirmationResponse.result = 'temPATH_DRY';
 
         return outgoingPayment._recordAcceptanceOrRejectionStatus(confirmationResponse)
@@ -147,10 +148,10 @@ describe('Sending a queued payment to ripple', function() {
   it.skip('should send a ripple payment, response must have a status url', function(done){
     this.timeout(10000);
     RippleTransactions
-      .create(fixtures.outgoing_record)
+      .create(fixturesOutgoingPayment.requests.outgoing_record)
       .then(function (rippleTransaction) {
         var outgoingPayment = new OutgoingPayment(rippleTransaction);
-        return outgoingPayment._sendPayment(fixtures.requests.payment)
+        return outgoingPayment._sendPayment(fixturesRippleRestIntegration.requests.payment)
           .then(function(payment){
             chai.assert(payment.success);
             chai.assert(payment.status_url);
@@ -160,13 +161,27 @@ describe('Sending a queued payment to ripple', function() {
       .error(done);
   });
 
+  it('should prepare payment with source/destination currencies', function(done){
+    this.timeout(10000);
+
+    var outgoingPayment = new OutgoingPayment(fixturesOutgoingPayment.requests.outgoing_record);
+    outgoingPayment
+      ._buildPayment(fixturesOutgoingPayment.requests.ripple_address)
+      .then(function(prepared){
+        chai.assert.deepEqual(fixturesOutgoingPayment.responses.success.prepared_payment, prepared);
+        done();
+      })
+      .error(done);
+
+  });
+
   it('should mark record pending while a payment is being confirmed', function(done){
     this.timeout(10000);
     RippleTransactions
-      .create(fixtures.outgoing_record)
+      .create(fixturesOutgoingPayment.requests.outgoing_record)
       .then(function (rippleTransaction) {
         var outgoingPayment = new OutgoingPayment(rippleTransaction);
-        outgoingPayment._confirmPayment(fixtures.requests.pending_payment)
+        outgoingPayment._confirmPayment(fixturesRippleRestIntegration.requests.pending_payment)
           .error(function(payment){
             chai.assert(outgoingPayment.record.state, 'pending');
             done();
@@ -179,10 +194,10 @@ describe('Sending a queued payment to ripple', function() {
     this.timeout(10000);
     var outgoingPayment;
     RippleTransactions
-      .create(fixtures.outgoing_record)
+      .create(fixturesOutgoingPayment.requests.outgoing_record)
       .then(function(rippleTransaction){
         outgoingPayment = new OutgoingPayment(rippleTransaction);
-        return outgoingPayment._sendPayment(fixtures.requests.payment)
+        return outgoingPayment._sendPayment(fixturesRippleRestIntegration.requests.payment)
       })
       .then(function(pendingPayment){
         return outgoingPayment._confirmPayment(pendingPayment)
@@ -202,10 +217,10 @@ describe('Sending a queued payment to ripple', function() {
     this.timeout(10000);
     var outgoingPayment;
     RippleTransactions
-      .create(fixtures.outgoing_record_invoice_id_memos)
+      .create(fixturesOutgoingPayment.requests.outgoing_record_invoice_id_memos)
       .then(function(rippleTransaction){
         outgoingPayment = new OutgoingPayment(rippleTransaction);
-        return outgoingPayment._sendPayment(fixtures.requests.payment)
+        return outgoingPayment._sendPayment(fixturesRippleRestIntegration.requests.payment)
       })
       .then(function(pendingPayment){
         return outgoingPayment._confirmPayment(pendingPayment)
@@ -213,7 +228,7 @@ describe('Sending a queued payment to ripple', function() {
       .then(function(confirmedPayment){
         chai.assert(confirmedPayment.memos);
         chai.assert.isArray(confirmedPayment.memos);
-        chai.assert.equal(confirmedPayment.invoice_id, fixtures.outgoing_record_invoice_id_memos.invoice_id);
+        chai.assert.equal(confirmedPayment.invoice_id, fixturesOutgoingPayment.requests.outgoing_record_invoice_id_memos.invoice_id);
         done();
       })
       .error(done);
@@ -221,7 +236,7 @@ describe('Sending a queued payment to ripple', function() {
 
   it('should update the outgoing payment with the source balance changes', function(done) {
 
-    var validatedPayment = fixtures.successful_responses.validated_payment;
+    var validatedPayment = fixturesRippleRestIntegration.successful_responses.validated_payment;
 
     validatedPayment.source_balance_changes = [
       { value: '-1.012', currency: 'XRP', issuer: '' },
@@ -235,7 +250,7 @@ describe('Sending a queued payment to ripple', function() {
     ];
 
     RippleTransactions
-      .create(fixtures.outgoing_record_invoice_id_memos)
+      .create(fixturesOutgoingPayment.requests.outgoing_record_invoice_id_memos)
       .then(function(rippleTransaction){
         outgoingPayment = new OutgoingPayment(rippleTransaction);
         return outgoingPayment._recordAcceptanceOrRejectionStatus(validatedPayment)
@@ -252,7 +267,7 @@ describe('Sending a queued payment to ripple', function() {
 
   it('should update the outgoing payment with the source balance changes', function(done) {
 
-    var validatedPayment = fixtures.successful_responses.validated_payment;
+    var validatedPayment = fixturesRippleRestIntegration.successful_responses.validated_payment;
 
     validatedPayment.source_balance_changes = [
       { value: '-1.012', currency: 'XRP', issuer: '' },
@@ -266,7 +281,7 @@ describe('Sending a queued payment to ripple', function() {
     ];
 
     RippleTransactions
-      .create(fixtures.outgoing_record_invoice_id_memos)
+      .create(fixturesOutgoingPayment.requests.outgoing_record_invoice_id_memos)
       .then(function(rippleTransaction){
         outgoingPayment = new OutgoingPayment(rippleTransaction);
         return outgoingPayment._recordAcceptanceOrRejectionStatus(validatedPayment)

@@ -1,3 +1,11 @@
+#### 03/12/2015
+
+### 3.35.2
+
+#### Fixed Bugs
+
+- Ability to specify source currency issuer
+
 #### 02/13/2015
 
 ### 3.35.0
