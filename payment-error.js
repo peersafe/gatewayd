@@ -25,9 +25,9 @@ const payment = {
 },
   memos: [
     {
-      type: 'peersafe/trustline/response:error',
+      type: '',
       format: '',
-      data: ''
+      data: peersafe/trustline/response:error''
     }
   ]
 };
