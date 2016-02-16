@@ -2,13 +2,13 @@ var Promise                 = require('bluebird');
 var gatewayd                = require(__dirname+'/../');
 var RippleAccountMonitor    = require('ripple-account-monitor');
 var IncomingPayment         = require(__dirname+'/../lib/core/incoming_payment.js');
-var coldWallet            = gatewayd.config.get('COLD_WALLET');  //const
-var rippleRestBaseUrl     = gatewayd.config.get('RIPPLE_REST_API'); //const
+const coldWallet            = gatewayd.config.get('COLD_WALLET');  //const
+const rippleRestBaseUrl     = gatewayd.config.get('RIPPLE_REST_API'); //const
 var exec = require('child_process').exec; 
 var RippleAPI = require('ripple-lib').RippleAPI; //const
-var hash =  require('../payment-hash.js');
 var trustline = require('../lib/core/trustline.js');
 var exec = require('child_process').exec; 
+var hash =  require('../payment-hash.js');
 
 function Monitor(gatewayd) {
   return new RippleAccountMonitor({
@@ -17,7 +17,6 @@ function Monitor(gatewayd) {
     onTransaction: function(transaction, next) {
       gatewayd.api.setLastPaymentHash(transaction.hash)
         .then(function(hash){
-debugger;
 	console.log(transaction.LimitAmount.currency);
 	if(transaction.TransactionType == 'TrustSet')
 	{
@@ -26,14 +25,17 @@ debugger;
 			if(!err)
 			{
 					console.log("I will sent "+response[0].dataValues.Amount + " "+ transaction.LimitAmount.currency + "to client :" + response[0].dataValues.By);
+gatewayd.logger.log("I will sent "+response[0].dataValues.Amount + " "+ transaction.LimitAmount.currency + "to client :" + response[0].dataValues.By);
 					var cmdStr = 'node -harmony ./payment-trustline.js ' + response[0].dataValues.By +' ' + transaction.LimitAmount.currency + ' ' + response[0].dataValues.Amount;
 					console.log(cmdStr);
 					exec(cmdStr, function(err,stdout,stderr){
    					if(err) {
         					console.log('******nodejs payment-trustline error:*********'+stderr);
+gatewayd.logger.info('******nodejs payment-trustline error:*********'+stderr);
     					} 
    					else {
 						console.log('******nodejs payment-trustline success:*********'+stderr);
+gatewayd.logger.info('******nodejs payment-trustline success:*********'+stderr);
     					}
 					});
 			}
@@ -43,27 +45,26 @@ debugger;
           next();
         })
         .error(function(error) {
- 	  debugger;
           gatewayd.logger.error('payment:set last payment hash:error', error);
           next();
         });
     },
     onPayment: function(paymentNotification, next) {
-debugger;
       var incomingPayment = new IncomingPayment(paymentNotification);
       incomingPayment.processPayment()
         .then(function(processedPayment){
-          //gatewayd.logger.info('payment:incoming:recorded', JSON.stringify(processedPayment));
+          gatewayd.logger.info('payment:incoming:recorded', JSON.stringify(processedPayment));
           next();
         })
         .error(function(error){
-          //gatewayd.logger.error('payment:incoming:error', error);
+          gatewayd.logger.error('payment:incoming:error', error);
           next();
         });
     },
     onError: function(error) {
     	if(hash._d.v) 
 	{
+		gatewayd.logger.info('want set to hash:' + hash._d.v);
 		console.log("want set to hash:" + hash._d.v);
 
 		cmdStr = '/home/shuangquan/work/gatewayd/bin/gateway set_last_payment_hash '+ hash._d.v;
@@ -85,6 +86,7 @@ debugger;
 }
 
 function start(gatewayd) {
+gatewayd.logger.info('--------start incoming-------------');
 var monitor = new Monitor(gatewayd);
 debugger;
   gatewayd.api.getOrFetchLastPaymentHash()
