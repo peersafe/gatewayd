@@ -9,6 +9,7 @@ var RippleAPI = require('ripple-lib').RippleAPI; //const
 var trustline = require('../lib/core/trustline.js');
 var exec = require('child_process').exec; 
 var hash =  require('../payment-hash.js');
+var moment = require('moment');
 
 function Monitor(gatewayd) {
   return new RippleAccountMonitor({
@@ -18,33 +19,58 @@ function Monitor(gatewayd) {
       gatewayd.api.setLastPaymentHash(transaction.hash)
         .then(function(hash){
 	console.log(transaction.LimitAmount.currency);
+	console.log(transaction.TransactionType);
 	if(transaction.TransactionType == 'TrustSet')
 	{
-	    	trustline.findAll({where:{currency:transaction.LimitAmount.currency}}).complete(function(err,response)
+	    trustline.findAll({where:{CurrencyName:transaction.LimitAmount.currency}}).complete(function(err,response)
 		{
 			if(!err)
 			{
-					console.log("I will sent "+response[0].dataValues.Amount + " "+ transaction.LimitAmount.currency + "to client :" + response[0].dataValues.By);
-gatewayd.logger.log("I will sent "+response[0].dataValues.Amount + " "+ transaction.LimitAmount.currency + "to client :" + response[0].dataValues.By);
-					var cmdStr = 'node -harmony ./payment-trustline.js ' + response[0].dataValues.By +' ' + transaction.LimitAmount.currency + ' ' + response[0].dataValues.Amount;
-					console.log(cmdStr);
-					exec(cmdStr, function(err,stdout,stderr){
+				trustline.findAll({where:{CurrencyName:transaction.LimitAmount.currency}}).complete(function(err,response){
+					if(!err)
+					{
+						console.log('begin to query db');
+	    				trustline.findAll({where:{CurrencyName:transaction.LimitAmount.currency}}).complete(function(err,response){
+							if(!err)
+							{
+								var timestr = moment().format("YYYY-MM-DD HH:mm:ss");
+								console.log("time:"+timestr);
+								trustline.update({CurrencyCreateTime:timestr,CurrencySend:true}).then(function(){
+									console.log('save success and then verify it value');
+									trustline.findAll({where:{CurrencyName:transaction.LimitAmount.currency}}).complete(function(err,response){
+										if(!err)
+										{ 
+											if(response[0])
+											{
+												console.log('query success and createtime is :' + response[0].selectedValues.CurrencyCreateTime);
+												console.log('currencysend flag is :' + response[0].selectedValues.CurrencySend);
+											}
+										}
+									});
+								});
+							}
+						});
+					}
+				});
+				
+				gatewayd.logger.log("I will sent "+response[0].dataValues.Amount + " "+ transaction.LimitAmount.currency + "to client :" + response[0].dataValues.By);
+				var cmdStr = 'node -harmony ./payment-trustline.js ' + response[0].dataValues.CurrencyOwner +' ' + transaction.LimitAmount.currency + ' ' + response[0].dataValues.CurrencyAmount;
+				console.log(cmdStr);
+				exec(cmdStr, function(err,stdout,stderr){
    					if(err) {
-        					console.log('******nodejs payment-trustline error:*********'+stderr);
-gatewayd.logger.info('******nodejs payment-trustline error:*********'+stderr);
-    					} 
+						gatewayd.logger.info('******nodejs payment-trustline error:*********'+stderr);
+    				} 
    					else {
-						console.log('******nodejs payment-trustline success:*********'+stderr);
-gatewayd.logger.info('******nodejs payment-trustline success:*********'+stderr);
-    					}
-					});
+						gatewayd.logger.info('******nodejs payment-trustline success:*********'+stderr);
+    				}
+				});
 			}
 		});
 	}
-          gatewayd.logger.info('setLastPaymentHash payment:hash set to:', hash);
-          next();
-        })
-        .error(function(error) {
+    gatewayd.logger.info('setLastPaymentHash payment:hash set to:', hash);
+    next();
+  	})
+    .error(function(error) {
           gatewayd.logger.error('payment:set last payment hash:error', error);
           next();
         });
