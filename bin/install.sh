@@ -15,6 +15,7 @@ sudo -u postgres psql -U postgres -d postgres -c "alter user postgres with passw
 sudo -u postgres createdb ripple_gateway
 export DATABASE_URL=postgres://postgres:password@localhost:5432/ripple_gateway
 
+sudo npm install -g pm2
 sudo npm install -g pg
 sudo npm install -g db-migrate
 sudo npm install -g forever
