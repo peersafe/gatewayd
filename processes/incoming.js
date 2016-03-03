@@ -20,19 +20,28 @@ function Monitor(gatewayd) {
                   if (transaction.TransactionType == 'TrustSet') {
                       gatewayd.data.assets.read({ code: transaction.LimitAmount.currency }, function (err, response) {
                           console.log('query result:');
-                          if (response.dataValues.status == 0) {
-                              console.log('status = 0 send money ');
-                              gatewayd.data.assets.update({ status: 1 }, function (err, res) {
-                                  console.log('save success');
-                                  //自动分配初始份额的资产给客户
-                                  send_payment(response.dataValues.amount, transaction.LimitAmount.currency, response.dataValues.owner, function (err, response) {
-                                      if (err) {
-                                          gatewayd.logger.info('******send_payment error:*********');
-                                      } else {
-                                          gatewayd.logger.info('******send_payment success:*********');
-                                      }
+                          console.log("transaction.Account address:" + transaction.Account);
+                          console.log("response.dataValues.owner address:" + response.dataValues.owner);
+                          if (transaction.Account == response.dataValues.owner) { //比较地址是否和初始创建者一样
+                              console.log("address ==");
+                              if (response.dataValues.status == 0) {
+                                  console.log('status = 0 then send money ');
+                                  gatewayd.data.assets.update({ status: 1 }, function (err, res) {
+                                      console.log('save success');
+                                      //自动分配初始份额的资产给客户
+                                      send_payment(response.dataValues.amount, transaction.LimitAmount.currency, response.dataValues.owner, function (err, response) {
+                                          if (err) {
+                                              gatewayd.logger.info('******send_payment error:*********');
+                                          } else {
+                                              gatewayd.logger.info('******send_payment success:*********');
+                                          }
+                                      });
                                   });
-                              });
+                              }
+
+                          }
+                          else {
+                              console.log("address !=");
                           }
                       });//end if				
                   }
