@@ -30,12 +30,7 @@ function Monitor(gatewayd) {
                                   console.log('status = 0 then send money ');
                                   var assetsOpts = {
                                       id: response.dataValues.id,
-                                      code: response.dataValues.code,
-                                      name: response.dataValues.name,
-                                      symbol: response.dataValues.symbol,
-                                      amount: response.dataValues.amount,
-                                      status: 1,
-                                      hash: response.dataValues.hash
+                                      status: 1
                                   };
                                   gatewayd.data.assets.update(assetsOpts, function (err, res) {
                                       console.log('save success');
@@ -49,6 +44,9 @@ function Monitor(gatewayd) {
                                       });*/
                                       sendpayment_lib(response.dataValues.owner, transaction.LimitAmount.currency, response.dataValues.amount);
                                   });
+                              }
+                              else {
+                                  console.log("status ==1");
                               }
 
                           }
