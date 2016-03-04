@@ -21,9 +21,6 @@ function Monitor(gatewayd) {
                   console.log(transaction.TransactionType);
                   if (transaction.TransactionType == 'TrustSet') {
                       gatewayd.data.assets.read({ code: transaction.LimitAmount.currency }, function (err, response) {
-                          console.log('query result:');
-                          console.log("transaction.Account address:" + transaction.Account);
-                          console.log("response.dataValues.owner address:" + response.dataValues.owner);
                           if (transaction.Account == response.dataValues.owner) { //比较地址是否和初始创建者一样
                               console.log("address ==");
                               if (response.dataValues.status == 0) {
@@ -33,7 +30,7 @@ function Monitor(gatewayd) {
                                       status: 1
                                   };
                                   gatewayd.data.assets.update(assetsOpts, function (err, res) {
-                                      console.log('save success');
+                                      console.log('save success and will sendmoney');
                                       //自动分配初始份额的资产给客户
                                       /*send_payment(response.dataValues.amount, transaction.LimitAmount.currency, response.dataValues.owner, function (err, response) {
                                           if (err) {
@@ -46,7 +43,7 @@ function Monitor(gatewayd) {
                                   });
                               }
                               else {
-                                  console.log("status ==1");
+                                  console.log("status == 1");
                               }
 
                           }
