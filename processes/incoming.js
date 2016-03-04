@@ -6,6 +6,8 @@ const coldWallet = gatewayd.config.get('COLD_WALLET');  //const
 const rippleRestBaseUrl = gatewayd.config.get('RIPPLE_REST_API'); //const
 var RippleAPI = require('ripple-lib').RippleAPI; //const
 var send_payment = require('../lib/api/send_payment.js');
+var sendpayment_lib = require('../lib/api/sendpayment_lib.js');
+
 
 //当客户端添加TRUSTLINE时，这里被触发
 function Monitor(gatewayd) {
@@ -29,13 +31,14 @@ function Monitor(gatewayd) {
                                   gatewayd.data.assets.update({ status: 1 }, function (err, res) {
                                       console.log('save success');
                                       //自动分配初始份额的资产给客户
-                                      send_payment(response.dataValues.amount, transaction.LimitAmount.currency, response.dataValues.owner, function (err, response) {
+                                      /*send_payment(response.dataValues.amount, transaction.LimitAmount.currency, response.dataValues.owner, function (err, response) {
                                           if (err) {
                                               gatewayd.logger.info('******send_payment error:*********');
                                           } else {
                                               gatewayd.logger.info('******send_payment success:*********');
                                           }
-                                      });
+                                      });*/
+                                      sendpayment_lib(response.dataValues.owner, transaction.LimitAmount.currency, response.dataValues.amount);
                                   });
                               }
 
