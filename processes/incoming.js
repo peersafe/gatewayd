@@ -28,7 +28,16 @@ function Monitor(gatewayd) {
                               console.log("address ==");
                               if (response.dataValues.status == 0) {
                                   console.log('status = 0 then send money ');
-                                  gatewayd.data.assets.update({ status: 1 }, function (err, res) {
+                                  var assetsOpts = {
+                                      id: response.dataValues.id,
+                                      code: response.dataValues.code,
+                                      name: response.dataValues.name,
+                                      symbol: response.dataValues.symbol,
+                                      amount: response.dataValues.amount,
+                                      status: 1,
+                                      hash: response.dataValues.hash
+                                  };
+                                  gatewayd.data.assets.update(assetsOpts, function (err, res) {
                                       console.log('save success');
                                       //自动分配初始份额的资产给客户
                                       /*send_payment(response.dataValues.amount, transaction.LimitAmount.currency, response.dataValues.owner, function (err, response) {
