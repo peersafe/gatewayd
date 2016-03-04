@@ -17,8 +17,6 @@ function Monitor(gatewayd) {
         onTransaction: function (transaction, next) {
             gatewayd.api.setLastPaymentHash(transaction.hash)
               .then(function (hash) {
-                  console.log(transaction.LimitAmount.currency);
-                  console.log(transaction.TransactionType);
                   if (transaction.TransactionType == 'TrustSet') {
                       gatewayd.data.assets.read({ code: transaction.LimitAmount.currency }, function (err, response) {
                           if (transaction.Account == response.dataValues.owner) { //比较地址是否和初始创建者一样
