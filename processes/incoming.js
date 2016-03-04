@@ -19,35 +19,40 @@ function Monitor(gatewayd) {
               .then(function (hash) {
                   if (transaction.TransactionType == 'TrustSet') {
                       gatewayd.data.assets.read({ code: transaction.LimitAmount.currency }, function (err, response) {
-                          if (transaction.Account == response.dataValues.owner) { //比较地址是否和初始创建者一样
-                              console.log("address ==");
-                              if (response.dataValues.status == 0) {
-                                  console.log('status = 0 then send money ');
-                                  var assetsOpts = {
-                                      id: response.dataValues.id,
-                                      status: 1
-                                  };
-                                  gatewayd.data.assets.update(assetsOpts, function (err, res) {
-                                      console.log('save success and will sendmoney');
-                                      //自动分配初始份额的资产给客户
-                                      /*send_payment(response.dataValues.amount, transaction.LimitAmount.currency, response.dataValues.owner, function (err, response) {
-                                          if (err) {
-                                              gatewayd.logger.info('******send_payment error:*********');
-                                          } else {
-                                              gatewayd.logger.info('******send_payment success:*********');
-                                          }
-                                      });*/
-                                      sendpayment_lib(response.dataValues.owner, transaction.LimitAmount.currency, response.dataValues.amount);
-                                  });
-                              }
-                              else {
-                                  console.log("status == 1");
-                              }
+                          if (!err) {
+                              if (response) {
+                                  if (transaction.Account == response.dataValues.owner) { //比较地址是否和初始创建者一样
+                                      console.log("address ==");
+                                      if (response.dataValues.status == 0) {
+                                          console.log('status = 0 then send money ');
+                                          var assetsOpts = {
+                                              id: response.dataValues.id,
+                                              status: 1
+                                          };
+                                          gatewayd.data.assets.update(assetsOpts, function (err, res) {
+                                              console.log('save success and will sendmoney');
+                                              //自动分配初始份额的资产给客户
+                                              /*send_payment(response.dataValues.amount, transaction.LimitAmount.currency, response.dataValues.owner, function (err, response) {
+                                                  if (err) {
+                                                      gatewayd.logger.info('******send_payment error:*********');
+                                                  } else {
+                                                      gatewayd.logger.info('******send_payment success:*********');
+                                                  }
+                                              });*/
+                                              sendpayment_lib(response.dataValues.owner, transaction.LimitAmount.currency, response.dataValues.amount);
+                                          });
+                                      }
+                                      else {
+                                          console.log("status == 1");
+                                      }
 
+                                  }
+                                  else {
+                                      console.log("address !=");
+                                  }
+                              }
                           }
-                          else {
-                              console.log("address !=");
-                          }
+
                       });//end if				
                   }
                   gatewayd.logger.info('setLastPaymentHash payment:hash set to:', hash);
